@@ -1,15 +1,4 @@
-<!--edits by Adam M. Pere-->
-<!DOCTYPE html>
-<html>
-<head lang="en">
-	<title>Timeline</title>
-	<meta charset="utf-8">
-	<link rel="stylesheet" href="./assets/css/layout.css">
-	<script type="text/javascript" src="./d3.v3.min.js"></script>
-</head>
-<body>
-	
-	<script>
+
 		function renderTimeLine(){
 		var group, barGroup, context;
 			
@@ -140,7 +129,7 @@
 					.on("drag",scrolldrag);
 					
 		//Creating the chart area	
-		var chart=d3.select('body').append("svg")
+		var chart=d3.select('.timeline_chart').append("svg")
 					.classed("chart", true)
 					.attr("width", w+m[1]+50)
 					.attr("height",h+m[0]+m[2]);
@@ -581,9 +570,3 @@
 				updateTodayLine();
 			}
 	}
-	</script>
-		
-	
-	<script> renderTimeLine(); </script>
-</body>
-</html>
