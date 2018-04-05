@@ -10,9 +10,8 @@
 <body>
 	
 	<script>
-	var temp, temp1;
 		function renderTimeLine(){
-		var group, barGroup, context, scruboffset = 0, scrubData, t1, scrubDisplay;
+		var group, barGroup, context;
 			
 		var m = [80, 160, 0, 80]; // top right bottom left
 		var m2 = [570, 160, 20, 80];
@@ -135,14 +134,8 @@
 					.x(x2)
 					.extent([lDate, rDate])
 					.on("brush", brushed);
-			
 		
-
-		//Declaring the drag for the scrubber				
-		var drag = d3.behavior.drag()
-					.on("dragstart",scrubstart)
-					.on("drag", scrub);
-
+		//Drag for scroller
 		var vDrag = d3.behavior.drag()
 					.on("drag",scrolldrag);
 					
@@ -228,7 +221,6 @@
 		});
 		
 		pane.call(zoom);
-		var todayLine = chart.append("g"); //Appends a line indicatiin current date and month
 					
 		var day = currDate.getDate();
 		var month = currDate.getMonth();
@@ -265,52 +257,6 @@
 				.attr("width", 115)
 				.attr("height", h+50)
 				.attr("fill", "white");
-		
-		
-		//Appends a draggable rectangle over the bars to display the names of the drugs
-		//selected by the it while dragging     
-		scrubber=chart.append("g");									
-		
-		//Creates the draggable rectangle
-		scrubber.append("rect")
-			.attr("class", "scrubber")
-			.attr("x", w- 22)
-			.attr("width", "1000px")
-			.attr("y", 55)
-			.attr("height", h-80)
-			.attr("fill", "#ffffff")
-			.attr("fill-opacity", .9 )
-			.attr("cursor", "move")
-			.attr("stroke", "#c7c7c7")
-			.attr("stroke-width", 1)
-			.attr("stroke-dasharray", [0, 800+(h-80)+800,h-80])
-			.call(drag);
-            
-		//Appends text over the scrubber and initially makes them invisible	
-		projects.each(function(d, i){
-			scrubDisplay = scrubber.append("g")
-								.attr("transform",this.attributes[1].value)
-								.classed("scrubDisplay", true);
-
-			scrubDisplay.append("text")
-					.attr("class","displayLabel")
-					.attr("fill","#000000")
-					.attr("width","100px")
-					.attr("x",w+50)
-					.attr("y", 3)
-					.attr("height","20px")
-					.attr("font-size", "12px")
-					.attr("font-weight", "bold");
-
-			scrubDisplay.append("text")
-					.attr("class","displayDose")
-					.attr("fill","#000000")
-					.attr("width","50px")
-					.attr("x",w+115)
-					.attr("y", 3)
-					.attr("height","20px")
-					.attr("font-size", "11px");
-		});
 
 		chart.append("rect")
 			.attr("x", -10)
@@ -484,80 +430,7 @@
 									});
 				});
 			});
-		}	
-		
-		//This function sets the scrub offset on start of drag	
-		function scrubstart(d){
-			scruboffset = 0;
 		}
-		
-		//This allows to move the scrubber over the bars and sets the extent to which it can
-		//be dragged	
-		function scrub(d){
-			//console.log(d3.event.dy);
-			if(d3.event.x-scruboffset >= 1080)
-				scrubber.select(".scrubber").attr("x", 1080);
-			else if(d3.event.x-scruboffset <= 125)
-				scrubber.select(".scrubber").attr("x", 125);
-			else
-				scrubber.select(".scrubber").attr("x", d3.event.x-scruboffset);
-			//On dragging the scrubber updates the names of the drugs selected by it
-			updateOnScrub();
-		}
-		
-		//Displays the drug names over the scrubber based on the time bars selected by it
-		updateOnScrub = function(){
-			var ind = 0;
-			scrubber.selectAll(".scrubDisplay").each(function(d,j){
-				var scrubGroup = d3.select(this);
-
-				scrubGroup.selectAll(".displayLabel").attr("x",scrubber.select(".scrubber").attr("x")*1 + 30)
-					.attr("fill","none");
-					
-				scrubGroup.selectAll(".displayDose").attr("x",scrubber.select(".scrubber").attr("x")*1 + 125)
-					.attr("fill","none");
-
-				//console.log(scrubGroup)
-				for(var i = 0; i < data[ind].dates.length; i++){
-					if((x.invert(1*scrubber.select(".scrubber").attr("x")+20) < data[ind].dates[i].enddate) && 
-						(x.invert(1*scrubber.select(".scrubber").attr("x")+20) > data[ind].dates[i].startdate)){
-						
-						scrubGroup.selectAll(".displayLabel").each(function(d){
-							d3.select(this)
-								.attr("fill", "rgba(67,67,67,1)")
-								.text(data[ind].label + " ");
-						});
-
-						scrubGroup.selectAll(".displayDose").each(function(d,j){
-							d3.select(this)
-								.attr("fill", "rgba(67,67,67,1)")
-								.text(data[ind].dates[i].dosage + data[ind].dates[i].dosage3 + data[ind].dates[i].dosage2);
-						})
-					}
-				}
-				ind++;
-			});
-
-			//Updating yAxis labels of the timeline
-			updateYLabels();
-		};
-		
-		//Changes the color of the yAxis labels based on the bars selected by the scrubber to
-		//indicate active and inactive projects.
-		updateYLabels = function(){
-			var scrubberArray=[];				
-			scrubberArray=scrubber.selectAll(".displayLabel")[0]; //Adds the bars selected by the scrubber to this array
-
-			var yLabelArray=d3.selectAll(".yAxisText")[0]; //Adds the yAxis text to this array
-			
-			for(var k=0; k<scrubberArray.length; k++){		
-				if(scrubberArray[k].attributes[1].value == "rgba(67,67,67,1)"){
-					d3.select(yLabelArray[k]).attr("fill", "rgba(67,67,67,1)");
-				}else{
-					d3.select(yLabelArray[k]).attr("fill", "rgba(67,67,67,.5)");
-				}
-			}
-		};
 
 		//Gets the translation value of the scroll bar and allows for scrolling of the chart
 		//in the vertical direction by calling the updateOnScroll function
@@ -582,24 +455,6 @@
 				else
 					tranStr = 0;
 				d3.select(this).attr('transform', 'translate(-20,'+ (tranStr*1+yVal) +')') ;
-			});
-
-			scrubber.selectAll(".displayLabel").each(function(d,j){
-				var scrubStr = d3.select(this).attr("transform");
-				if(scrubStr != null)
-					scrubStr = scrubStr.substring(13,scrubStr.length-1);
-				else
-					scrubStr = 0;
-				d3.select(this).attr('transform', 'translate(0, '+ (scrubStr*1+yVal) +')') ;
-			});
-
-			scrubber.selectAll(".displayDose").each(function(d,j){
-				var scrubStr = d3.select(this).attr("transform");
-				if(scrubStr != null)
-					scrubStr = scrubStr.substring(13,scrubStr.length-1);
-				else
-					scrubStr = 0;
-				d3.select(this).attr('transform', 'translate(0, '+ (scrubStr*1+yVal) +')') ;
 			});
 
 			yAxisLabel.selectAll(".yAxisText").each(function(d,j){
