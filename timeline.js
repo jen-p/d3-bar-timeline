@@ -89,20 +89,12 @@ function renderTimeLine(){
 	var rDate = new Date();	//Variable to store the right date to set brush extent
 	var currDate = new Date(); //Stores the current Date
 	
-	var w1  = 1100 - 960; //calculate offset so that the today line (currDate) is aligned with the scrubber ( 1100 is the width of svg, 960 is the width being shown)
 	rDate = new Date(2014, 0, 15);
 	lDate.setTime(rDate.getTime() - (1000*60*60*24*365*2)); //2 years before the right date (note: that multiplication is calculating the # of miliseconds in 2 years 
 		
-	
-	//Moves the small today's date line so that it lines up with the large today's date line.
-	//Only works for the date September, 18, 2013
-	var sudoMaxDate = maxDate;
-	sudoMaxDate.setMonth(sudoMaxDate.getMonth() + 3);
-	sudoMaxDate.setDate(sudoMaxDate.getDate() - 20);
-		
 	//Setting the domain of the x-axis	
 	x.domain([minDate, maxDate]);
-	x2.domain([minDate, sudoMaxDate]);
+	x2.domain([minDate, maxDate]);
 		
 
 	//Setting the Y-axis 	
@@ -113,13 +105,12 @@ function renderTimeLine(){
 	zoom = d3.behavior.zoom()
 				.scaleExtent([.7, 1.3])
 				.on("zoom", zoomed);
-		
-	
-	//Declaring the brush 				
+
+	//Declaring the brush
 	brush = d3.svg.brush()
-				.x(x2)
-				.extent([lDate, rDate])
-				.on("brush", brushed);
+		.x(x2)
+		.extent([lDate, rDate])
+		.on("brush", brushed);
 	
 	//Drag for scroller
 	var vDrag = d3.behavior.drag()
@@ -127,58 +118,52 @@ function renderTimeLine(){
 				
 	//Creating the chart area	
 	var chart=d3.select('.timeline_chart').append("svg")
-				.classed("chart", true)
-				.attr("width", w+m[1]+50)
-				.attr("height",h+m[0]+m[2]);
-		
-		
-	
+		.classed("chart", true)
+		.attr("width", w+m[1]+50)
+		.attr("height",h+m[0]+m[2]);
+
 	//Appending a rectangular pane to the chart area	
 	var pane = chart.append("g");
 	
 	pane.append("rect")
 		.attr("class", "pane")
-		.attr("x", 126)
-		.attr("width", w + 50)
+		//.attr("x", 126) //Use if you want the yaxis
+		.attr("x", 0)
 		.attr("y", 55)
-		.attr("height", h - 80)
-		.attr("stroke", "#EEEEEE")
-		.attr("stroke-width", 1);
+		//.attr("width", w + 50) //Use if you want the yaxis
+		.attr("width", w + 160)
+		.attr("height", h - 80);
 
 	//Setting the x-axis				
 	var xaxis=d3.svg.axis()
-				.scale(x)
-				.orient("top")
-				.tickSize(h-80)
-				.tickPadding(13);
+		.scale(x)
+		.orient("top")
+		.tickSize(h-80)
+		.tickPadding(13);
 				
 	var xaxis2 = d3.svg.axis()
-					.scale(x2)
-					.orient("bottom")
-					.tickPadding(3)
-					.tickSize(1);
+		.scale(x2)
+		.orient("bottom")
+		.tickPadding(3)
+		.tickSize(1);
 
 	var xaxis3 = d3.svg.axis()
-				.scale(x)
-				.orient("top")
-				.tickSize(0)
-				.tickPadding(3);
+		.scale(x)
+		.orient("top")
+		.tickSize(0)
+		.tickPadding(3);
 
 	//Append the x-axis to the chart
 	chart.append("g").attr("class", "x axis")
-			.attr("transform", "translate(-20, "+ (h-25) + ")")
-			.attr("font-size", "15px")
-			.call(xaxis);
-		
-		
+		.attr("transform", "translate(-20, "+ (h-25) + ")")
+		.attr("font-size", "15px")
+		.call(xaxis);
 
 	//Variable to create the timeline bars 		
 	var projects=chart.selectAll(".projectGroup").data(data).enter().append('g').classed("projectGroup", true)
-							.attr('transform', function(d, i){ return 'translate(-20,'+ (y(i)) +')' }) ;
+		.attr('transform', function(d, i){ return 'translate(-20,'+ (y(i)) +')' }) ;
 	
-	//Selects each project group and draws the reactangle for each drug
-	//based on the start date and end date in the data array and displays the
-	//dosage of each drug for a given period of time							
+	//Selects each project group and draws bar based on the start and end date
 	projects.each(function(d, i){
 		group = d3.select(this);
 		color = d3.rgb(d.color);
@@ -198,15 +183,15 @@ function renderTimeLine(){
 			.call(zoom);
 			
 		barGroup.selectAll(".timeBarstext")
-				.data(d.dates)
-				.enter()
-				.append("text")
-				.classed("timeBarstext", true)
-				.attr("y", 4)
-				.attr("fill", "white")
-				.attr("text-anchor", "end")
-				.attr("font-size", "11px")
-				.text(d.label);	
+			.data(d.dates)
+			.enter()
+			.append("text")
+			.classed("timeBarstext", true)
+			.attr("y", 4)
+			.attr("fill", "white")
+			.attr("text-anchor", "end")
+			.attr("font-size", "11px")
+			.text(d.label);	
 	});
 	
 	pane.call(zoom);
@@ -216,16 +201,16 @@ function renderTimeLine(){
 	var newDate = monthNames[month] + " " + day; //Stores the current date and month 
    
 	//Append the drug names on the y-axis
-	var yAxisLabel = chart.append("g");
+	/*var yAxisLabel = chart.append("g");
 	
 	yAxisLabel.append("rect")
-			.attr("class", "yAxisRect")
-			.attr("x", 0)
-			.attr("y", 54)
-			.attr("width", 125)
-			.attr("height", h+50)
-			.attr("stroke", "white")
-			.attr("fill", "white");
+		.attr("class", "yAxisRect")
+		.attr("x", 0)
+		.attr("y", 54)
+		.attr("width", 125)
+		.attr("height", h+50)
+		.attr("stroke", "white")
+		.attr("fill", "white");
 	
 	projects.each(function(d, i){
 		yAxisLabel.append("text")
@@ -241,11 +226,11 @@ function renderTimeLine(){
 	});
 
 	yAxisLabel.append("rect")
-			.attr("x", 0)
-			.attr("y", 590)
-			.attr("width", 115)
-			.attr("height", h+50)
-			.attr("fill", "white");
+		.attr("x", 0)
+		.attr("y", 590)
+		.attr("width", 115)
+		.attr("height", h+50)
+		.attr("fill", "white");*/
 
 	chart.append("rect")
 		.attr("x", -10)
@@ -255,25 +240,25 @@ function renderTimeLine(){
 		.attr("fill", "white");
 
 	chart.append("g").attr("class", "xaxis2")
-			.attr("transform", "translate(-20, 50)")
-			.attr("fill", "rgba(67,67,67,.5)")
-			.attr("font-size", "12px")
-			.call(xaxis3);
+		.attr("transform", "translate(-20, 50)")
+		.attr("fill", "rgba(67,67,67,.5)")
+		.attr("font-size", "12px")
+		.call(xaxis3);
 	
 	//A vertical scroll bar to scroll the chart vertically
 	scrollBar=chart.append("g");			
 	
 	scrollBar.append("rect")
-			.attr("class", "vScroller")
-			.attr("x", 1108)
-			.attr("width", 8)
-			.attr("y", 55)
-			.attr("height", (15/data.length)*515)
-			.attr("rx", 4)
-			.attr("ry", 4)
-			.attr("fill", "#AAA8A8")
-			.attr("cursor", "move")
-			.call(vDrag);
+		.attr("class", "vScroller")
+		.attr("x", 1108)
+		.attr("width", 8)
+		.attr("y", 55)
+		.attr("height", (15/data.length)*515)
+		.attr("rx", 4)
+		.attr("ry", 4)
+		.attr("fill", "#AAA8A8")
+		.attr("cursor", "move")
+		.call(vDrag);
 
 	//Variable to append a mini version of the timeline to allow brushing to select
 	//region one wants to view
@@ -282,13 +267,13 @@ function renderTimeLine(){
 	
 	//Appends a rectangular region to display the mini timeline			
 	context.append("rect")
-			.attr("x", 126)
-			.attr("width", w + 40)
-			.attr("y", -5)
-			.attr("height", 60)
-			.attr("stroke", "#d9d9d9")
-			.attr("stroke-width", .75)
-			.attr("fill", "#ededed");
+		.attr("x", 126)
+		.attr("width", w + 40)
+		.attr("y", -5)
+		.attr("height", 60)
+		.attr("stroke", "#d9d9d9")
+		.attr("stroke-width", .75)
+		.attr("fill", "#ededed");
 
 	context.append("rect")
 		.attr("x", 115)
@@ -306,9 +291,9 @@ function renderTimeLine(){
 	
 	//Creates the timeline bars in the context area	
 	var contextBars = context.selectAll(".projectGroup").data(data)
-							.enter().append("g")
-							.classed("contextBar", true)
-							.attr("transform", function(d, i){ return "translate(0, " + (y2(i)) + ")" ;});
+		.enter().append("g")
+		.classed("contextBar", true)
+		.attr("transform", function(d, i){ return "translate(0, " + (y2(i)) + ")" ;});
 	
 	//Selects each project group and draws bar based on the start and end date
 	contextBars.each(function(d, i){
@@ -316,43 +301,21 @@ function renderTimeLine(){
 		color = d3.rgb(d.color);
 		
 		cGroup.selectAll(".contextBars")
-				.data(d.dates)
-				.enter()
-				.append("rect")
-				.classed("cBars", true)
-				.attr("x", function(d){ return x2(d.startdate);})
-				.attr("width", function(d){ return x2(d.enddate) - x2(d.startdate);})
-				.attr("y", 2)
-				.attr("height", 1)
-				.attr("fill", color)
-				.attr("opacity",  function(d){ return d.effort;})
+			.data(d.dates)
+			.enter()
+			.append("rect")
+			.classed("cBars", true)
+			.attr("x", function(d){ return x2(d.startdate);})
+			.attr("width", function(d){ return x2(d.enddate) - x2(d.startdate);})
+			.attr("y", 2)
+			.attr("height", 1)
+			.attr("fill", color)
+			.attr("opacity",  function(d){ return d.effort;})
 	});
-	
-	//Appends a line indicating the current date in the context region
-	context.append("line")
-			.attr("class", "contextLine")
-			.attr("x1", x2(currDate))
-			.attr("x2", x2(currDate))
-			.attr("y1", -4)
-			.attr("y2", 54)
-			.attr("stroke-width", 1)
-			.attr("stroke", "black")
-			.attr("stroke-opacity", .5);
 	
 	//Appends a brush over the context region	
 	b = context.append("g")
 			.attr("class", "x brush");
-	
-    //Adding visible left and right circle handles    
-    var leftHandle = b.append("svg:circle")
-		.attr("r", 7)
-        .attr("cx",150)
-		.attr("cy",25);
-		
-    var rightHandle = b.append("svg:circle")
-		.attr("r", 7)
-		.attr("cx",175)
-		.attr("cy",25);
 	
     //makes sure that dragging the circles (handles) calls the brush function... otherwise dragging is broken in that region.    
     b.call(brush);
@@ -401,12 +364,12 @@ function renderTimeLine(){
 			//is not displayed
 			group.select(".barGroup").selectAll(".timeBarstext").each(function(d){
 				d3.select(this).attr("x", function(d){return x(d.startdate)+(x(d.enddate)-x(d.startdate))-8;})
-								.attr("fill", function(d){
-									if((x(d.enddate) - x(d.startdate))< 30)
-										return "none";
-									else
-										return "white";
-								});
+					.attr("fill", function(d){
+						if((x(d.enddate) - x(d.startdate))< 30)
+							return "none";
+						else
+							return "white";
+					});
 			});
 		});
 	}
@@ -523,13 +486,6 @@ function renderTimeLine(){
 		//Allows brushing over the mini timeline and helps selecting a particular
 		//section of the timeline
 		function brushed() {
-			leftHandle.attr("cx", function() {
-				return x2(brush.extent()[0]) + 1; 
-			});
-			rightHandle.attr("cx", function() {
-				return x2(brush.extent()[1]) - 1 ; 
-			});
-			
 			x.domain(brush.extent());
 			barGroup.selectAll(".timeBars").attr("x", function(d){return  x(d.startdate);});
 			barGroup.attr("width", 5);
@@ -543,13 +499,6 @@ function renderTimeLine(){
 		brushed();
 		
 		brushFunc = function() {
-			leftHandle.attr("cx", function() {
-				return x2(brush.extent()[0]) + 1; 
-			});
-			rightHandle.attr("cx", function() {
-				return x2(brush.extent()[1]) - 1 ; 
-			});
-			
 			x.domain(brush.extent());
 			barGroup.selectAll(".timeBars").attr("x", function(d){return  x(d.startdate);});
 			barGroup.attr("width", 5);
